@@ -1,0 +1,44 @@
+{
+  "name": "easy-report",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline-first desktop report generator",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "dist:win": "electron-vite build && electron-builder --config electron-builder.config.cjs --win nsis",
+    "dist:mac": "electron-vite build && electron-builder --config electron-builder.config.cjs --mac dmg",
+    "dist:linux": "electron-vite build && electron-builder --config electron-builder.config.cjs --linux AppImage"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "@napi-rs/canvas": "^0.1.68",
+    "echarts": "^5.5.1",
+    "exceljs": "^4.4.0",
+    "papaparse": "^5.4.1",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^4.8.69",
+    "pptxgenjs": "^3.12.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tesseract.js": "^5.1.1",
+    "xlsx": "^0.18.5",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/papaparse": "^5.3.15",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^3.0.0",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}
