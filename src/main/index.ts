@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import type { AppSettings, Branding, Dataset, ReportDefinition, ReportFilters } from '../shared/types'
 import { ingestFile } from './services/ingestion'
 import { runCleaning } from './services/cleaning/runCleaning'
+import { runAnalysis } from './services/analytics/runAnalytics'
 import { suggestReports } from './services/report/suggestion'
 import { buildReportDefinition, rebuildTemplate } from './services/report/builder'
 import { writeExcel } from './services/export/excel'
@@ -26,6 +27,7 @@ function registerHandlers() {
     return result.canceled ? null : result.filePaths[0] ?? null
   })
   ipcMain.handle('ingest:file', (_event, filePath: string) => ingestFile(filePath))
+  ipcMain.handle('analytics:describe', (_event, dataset: Dataset) => runAnalysis(dataset))
   ipcMain.handle('clean:run', (_event, dataset: Dataset, options) => runCleaning(dataset, options))
   ipcMain.handle('reports:suggest', (_event, dataset: Dataset) => suggestReports(dataset))
   ipcMain.handle('reports:build', (_event, dataset: Dataset, suggestionId: string, branding: Branding, filters?: ReportFilters, template?: ReportDefinition) => template ? rebuildTemplate(dataset, { id: template.id, name: template.title, createdAt: '', definition: template }, branding) : buildReportDefinition(dataset, suggestionId, branding, filters))
