@@ -30,4 +30,6 @@ AI column mapping is opt-in and only sends column names, inferred types, and up 
 
 `pnpm dist:win`, `pnpm dist:mac`, and `pnpm dist:linux` build NSIS, DMG, and AppImage packages. Set `EASY_REPORT_UPDATE_URL` to a hosted generic update feed to add the electron-builder publish target. Code signing and notarization require platform certificates and credentials, which are not included in the source tree.
 
+GitHub Actions builds all three desktop packages on pushes to `main` or `master`, and can also be started from the repository's Actions tab with **Build desktop installers** → **Run workflow**. Download each installer from the completed run's artifacts (`easy-report-Windows`, `easy-report-macOS`, and `easy-report-Linux`). Artifacts are kept for 14 days. macOS builds are unsigned unless signing credentials are configured.
+
 The provided shell targets desktop Windows, macOS, and Linux. The renderer uses responsive layouts, and the data/report logic is kept outside Electron-specific APIs so a native mobile shell can reuse it. Android and iOS installers require that additional shell and are not produced by Electron Builder.

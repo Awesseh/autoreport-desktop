@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import type { SavedTemplate } from '../../../shared/types'
 import { useStore } from '../state/store'
 export default function ReportSuggestions() {
   const { cleanedDataset, suggestions, setBusy, setError, setReport, settings, busy, error, templates, setTemplates } = useStore()

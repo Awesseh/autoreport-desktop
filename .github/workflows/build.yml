@@ -1,0 +1,78 @@
+name: Build desktop installers
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate source
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Run unit tests
+        run: pnpm test
+
+  package:
+    name: Package ${{ matrix.name }}
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            script: dist:win
+            installer: 'release/*.exe'
+          - name: macOS
+            os: macos-latest
+            script: dist:mac
+            installer: 'release/*.dmg'
+          - name: Linux
+            os: ubuntu-latest
+            script: dist:linux
+            installer: 'release/*.AppImage'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build installer
+        run: pnpm run ${{ matrix.script }}
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: easy-report-${{ matrix.name }}
+          path: ${{ matrix.installer }}
+          if-no-files-found: error
+          retention-days: 14

@@ -1,6 +1,5 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import { app } from 'electron'
 import Papa from 'papaparse'
 import ExcelJS from 'exceljs'
 import * as XLSX from 'xlsx'
@@ -10,7 +9,10 @@ import type { Column, ColumnType, Dataset, IngestResult } from '../../shared/typ
 const objectRow = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
 const empty = (value: unknown) => value === null || value === undefined || value === ''
 const text = (value: unknown): string => value instanceof Date ? value.toISOString() : String(value ?? '')
-const createOfflineOcrWorker = () => createWorker('eng', 1, { langPath: path.join(app.isPackaged ? process.resourcesPath : app.getAppPath(), app.isPackaged ? 'tessdata' : 'resources/tessdata') + path.sep, gzip: false, cacheMethod: 'none' })
+const createOfflineOcrWorker = async () => {
+  const { app } = await import('electron')
+  return createWorker('eng', 1, { langPath: path.join(app.isPackaged ? process.resourcesPath : app.getAppPath(), app.isPackaged ? 'tessdata' : 'resources/tessdata') + path.sep, gzip: false, cacheMethod: 'none' })
+}
 const inferType = (values: unknown[]): ColumnType => {
   const sample = values.filter((v) => !empty(v)).slice(0, 200)
   if (!sample.length) return 'unknown'
@@ -110,7 +112,7 @@ export async function ingestFile(filePath: string): Promise<IngestResult> {
         let ocrText = ''
         for (let i = 1; i <= Math.min(doc.numPages, 20); i++) {
           const page = await doc.getPage(i), viewport = page.getViewport({ scale: 2 }), canvas = canvasModule.createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height))
-          await page.render({ canvas: canvas as never, canvasContext: canvas.getContext('2d') as never, viewport }).promise
+          await page.render({ canvasContext: canvas.getContext('2d') as never, viewport }).promise
           const result = await worker.recognize(await canvas.toBuffer('image/png'))
           ocrText += `${result.data.text}\n`
         }

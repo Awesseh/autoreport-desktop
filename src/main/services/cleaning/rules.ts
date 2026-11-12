@@ -130,7 +130,7 @@ export function handleMissing(dataset: Dataset, policy: 'flag' | 'impute' | 'dro
     return { dataset: { ...dataset, rows }, changes: [change('missing-values', `Imputed missing values using column median or mode in ${missingRows.length} row(s).`, missingRows.length, affected)] }
   }
   const name = uniqueColumnName(dataset, '__missing_count')
-  const columns = hasColumn ? dataset.columns : [...dataset.columns, { name, type: 'number' as const }]
+  const columns = [...dataset.columns, { name, type: 'number' as const }]
   const rows = dataset.rows.map((r) => ({ ...r, [name]: dataset.columns.filter((c) => isMissing(r[c.name])).length }))
   return { dataset: { ...dataset, columns, rows }, changes: [change('missing-values', `Flagged missing cells in ${missingRows.length} row(s) with “${name}”.`, missingRows.length, dataset.columns.filter((c) => dataset.rows.some((r) => isMissing(r[c.name]))).map((c) => c.name).concat(name))] }
 }

@@ -1,4 +1,4 @@
-import type { Branding, Dataset, KpiSpec, PivotSpec, ReportDefinition, ReportFilters, SavedTemplate, SectionSpec } from '../../../shared/types'
+import type { Branding, ChartSpec, Dataset, KpiSpec, PivotSpec, ReportDefinition, ReportFilters, SavedTemplate, SectionSpec } from '../../../shared/types'
 import { profileDataset } from './suggestion'
 import { buildPivot } from '../../../shared/pivot'
 
