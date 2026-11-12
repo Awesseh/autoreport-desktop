@@ -10,9 +10,9 @@
     "preview": "electron-vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
-    "dist:win": "electron-vite build && electron-builder --config electron-builder.config.cjs --win nsis",
-    "dist:mac": "electron-vite build && electron-builder --config electron-builder.config.cjs --mac dmg",
-    "dist:linux": "electron-vite build && electron-builder --config electron-builder.config.cjs --linux AppImage"
+    "dist:win": "electron-vite build && electron-builder --publish never --config electron-builder.config.cjs --win nsis",
+    "dist:mac": "electron-vite build && electron-builder --publish never --config electron-builder.config.cjs --mac dmg",
+    "dist:linux": "electron-vite build && electron-builder --publish never --config electron-builder.config.cjs --linux AppImage"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",
