@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import Papa from 'papaparse'
-import ExcelJS from 'exceljs'
 import * as XLSX from 'xlsx'
 import { createWorker } from 'tesseract.js'
 import type { Column, ColumnType, Dataset, IngestResult } from '../../shared/types'
@@ -69,7 +68,7 @@ export async function ingestFile(filePath: string): Promise<IngestResult> {
       } else { rows = [parsed]; warnings.push('The JSON object was imported as a single-row dataset.') }
     } else throw new Error('JSON must contain an array of objects or a single object.')
     headers = [...new Set(rows.flatMap((row) => Object.keys(row)))]
-  } else if (ext === '.xls') {
+  } else if (ext === '.xls' || ext === '.xlsx') {
     const workbook = XLSX.read(await readFile(filePath), { type: 'buffer', cellDates: true }), sheetName = workbook.SheetNames[0]
     if (!sheetName) throw new Error('The workbook has no worksheets.')
     if (workbook.SheetNames.length > 1) warnings.push(`Only the first worksheet (“${sheetName}”) was imported; ${workbook.SheetNames.length - 1} additional sheet(s) were not included.`)
@@ -77,26 +76,6 @@ export async function ingestFile(filePath: string): Promise<IngestResult> {
     headers = (matrix.shift() ?? []).map((value, index) => String(value ?? '').trim() || `Column ${index + 1}`)
     let emptyRows = 0
     rows = matrix.flatMap((values) => { if (values.every(empty)) { emptyRows++; return [] }; return [Object.fromEntries(headers.map((header, index) => [header, values[index]]))] })
-    if (emptyRows) warnings.push(`${emptyRows} fully empty row(s) were skipped during workbook import.`)
-  } else if (ext === '.xlsx') {
-    const workbook = new ExcelJS.Workbook()
-    await workbook.xlsx.load(await readFile(filePath) as never)
-    const sheet = workbook.worksheets[0]
-    if (!sheet) throw new Error('The workbook has no worksheets.')
-    if (workbook.worksheets.length > 1) warnings.push(`Only the first worksheet (“${sheet.name}”) was imported; ${workbook.worksheets.length - 1} additional sheet(s) were not included.`)
-    const headerRow = sheet.getRow(1)
-    const maxCols = Math.max(sheet.columnCount, headerRow.cellCount)
-    headers = Array.from({ length: maxCols }, (_, i) => String(headerRow.getCell(i + 1).text || `Column ${i + 1}`).trim())
-    let emptyRows = 0
-    sheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return
-      const values = headers.map((_, index) => row.getCell(index + 1).value)
-      if (values.every((value) => empty(value) || (typeof value === 'object' && value !== null && 'text' in value && empty(value.text)))) { emptyRows++; return }
-      rows.push(Object.fromEntries(headers.map((header, index) => {
-        const value = values[index]
-        return [header, typeof value === 'object' && value !== null && 'text' in value ? (value as { text: string }).text : value]
-      })))
-    })
     if (emptyRows) warnings.push(`${emptyRows} fully empty row(s) were skipped during workbook import.`)
   } else if (ext === '.pdf') {
     const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default
